@@ -4,10 +4,10 @@
   "setting": {
     "useIsolateContext": true,
     "urlCheck": false,
-    "compileHotReLoad": false,
+    "compileHotReLoad": true,
     "lazyloadPlaceholderEnable": false
   },
-  "projectname": "小程序示例",
+  "projectname": "miniprogram-demo",
   "condition": {
     "miniprogram": {
       "list": [
