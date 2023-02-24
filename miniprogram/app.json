@@ -1,7 +1,7 @@
 {
   "pages": [
-    "page/component/index",
     "page/API/index",
+    "page/component/index",
     "page/cloud/index",
     "page/extend/index",
     "page/animation/index"
@@ -323,6 +323,12 @@
     "backgroundColor": "@tabBarBackgroundColor",
     "list": [
       {
+        "pagePath": "page/API/index",
+        "iconPath": "@iconPathAPI",
+        "selectedIconPath": "@selectedIconPathAPI",
+        "text": "接口"
+      },
+      {
         "pagePath": "page/component/index",
         "iconPath": "@iconPathComponent",
         "selectedIconPath": "@selectedIconPathComponent",
@@ -333,12 +339,6 @@
         "iconPath": "@iconPathComponent",
         "selectedIconPath": "@selectedIconPathComponent",
         "text": "交互动画"
-      },
-      {
-        "pagePath": "page/API/index",
-        "iconPath": "@iconPathAPI",
-        "selectedIconPath": "@selectedIconPathAPI",
-        "text": "接口"
       },
       {
         "pagePath": "page/cloud/index",
