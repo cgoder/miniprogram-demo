@@ -7,6 +7,7 @@ Component({
   behaviors: [glBehavior],
   data: {
     theme: 'light',
+    cameraPosition: 0,
   },
   lifetimes: {
     /**
@@ -64,8 +65,8 @@ Component({
 
           this.calcSize(info.windowWidth, info.windowHeight * 0.8)
 
-          this.initGL(this.canvas)
-          this.initVK()
+          this.glCtx = this.initGL(this.canvas)
+          this.initVK(this.glCtx)
         })
     },
     onUnload() {
@@ -73,7 +74,7 @@ Component({
       this.disposeVK()
       this.disposeGL(this.canvas)
     },
-    initVK() {
+    initVK(glCtx) {
       //检查vk支持情况
       const isSupportV1 = wx.isVKSupport('v1')
       const isSupportV2 = wx.isVKSupport('v2')
@@ -89,15 +90,15 @@ Component({
         this.session = wx.createVKSession({
           version: 'v2',
           track: { plane: { mode: 3 }, body: { mode: 1 } },
-          cameraPosition: 1,
-          // gl: glContext,  
+          cameraPosition: cameraPosition,
+          gl: glCtx,
         })
       } else if (isSupportV1) {
         this.session = wx.createVKSession({
           version: 'v1',
           track: { plane: { mode: 3 }, body: { mode: 1 } },
-          cameraPosition: 1,
-          // gl: glContext,  
+          cameraPosition: cameraPosition,
+          gl: glCtx,
         })
       } else {
         console.log("---VK not support!--- v1: v2: ", isSupportV1, isSupportV2)
@@ -224,6 +225,17 @@ Component({
         this.session.off('addAnchors')
         this.session.off('updateAnchors')
         this.session.off('removeAnchors')
+      }
+    },
+    switchCamera(event){
+      console.log('switchCamera')
+      if(this.session.config){
+        const config = this.session.config
+        config.cameraPosition = Number(event.currentTarget.dataset.value)
+        this.session.config = config
+        this.setData({
+          cameraPosition:event.currentTarget.dataset.value
+        })
       }
     },
 

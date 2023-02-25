@@ -12,13 +12,15 @@ const glBehavior = Behavior({
         initGL(glCanvas) {
             console.log('initGL')
             // 
-            const glCtx = this.glCtx = glCanvas.getContext('webgl')
+            const glCtx = glCanvas.getContext('webgl')
             console.log('initGL! glCtx:',glCtx)
 
             glCtx.useProgram(glCtx.getParameter(glCtx.CURRENT_PROGRAM))
 
             // this.initGLPerson(glCtx)
             // this.initGLFrame(glCtx)
+
+            return glCtx
         },
 
         disposeGL(glCanvas) {
