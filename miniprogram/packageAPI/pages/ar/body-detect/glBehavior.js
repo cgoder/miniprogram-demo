@@ -25,7 +25,7 @@ const glBehavior = Behavior({
 
         initGLThree(glCanvas) {
             console.log('initGLThree')
-            this.THREE = createScopedThreejs(glCanvas)
+            // this.THREE = createScopedThreejs(glCanvas)
             //gl模型加载
             //registerGLTFLoader(this.THREE)
 
@@ -55,20 +55,20 @@ const glBehavior = Behavior({
             this.disposeGLPerson()
             this.disposeGLFrame()
 
-            if (this.threeRender) {
-                this.threeRender.dispose()
-                this.threeRender = null
-            }
-            if (this.threejsScene) {
-                this.threejsScene.dispose()
-                this.threejsScene = null
-            }
-            if (this.threejsCamera) {
-                this.threejsCamera = null
-            }
-            if (this.THREE) {
-                this.THREE = null
-            }
+            // if (this.threeRender) {
+            //     this.threeRender.dispose()
+            //     this.threeRender = null
+            // }
+            // if (this.threejsScene) {
+            //     this.threejsScene.dispose()
+            //     this.threejsScene = null
+            // }
+            // if (this.threejsCamera) {
+            //     this.threejsCamera = null
+            // }
+            // if (this.THREE) {
+            //     this.THREE = null
+            // }
             if (this.glCtx) {
                 this.glCtx = null
             }
@@ -341,11 +341,11 @@ const glBehavior = Behavior({
         initGLFrame(glCtx) {
             console.log('initGLFrame')
 
-            // 相机
-            this.threejsCamera = new this.THREE.Camera()
+            // // 相机
+            // this.threejsCamera = new this.THREE.Camera()
 
-            // 场景
-            this.threejsScene = new this.THREE.Scene()
+            // // 场景
+            // this.threejsScene = new this.THREE.Scene()
             // // 光源
             // const light1 = new this.THREE.HemisphereLight(0xffffff, 0x444444) // 半球光
             // light1.position.set(0, 0.2, 0)
