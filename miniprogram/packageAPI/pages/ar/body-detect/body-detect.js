@@ -89,14 +89,22 @@ Component({
       if (isSupportV2) {
         this.session = wx.createVKSession({
           version: 'v2',
-          track: { plane: { mode: 3 }, body: { mode: 1 } },
+          track: {
+            // face: { mode: 1 },
+            body: { mode: 1 },
+            // hand: { mode: 1 },
+          },
           cameraPosition: this.data.cameraPosition,
           gl: glCtx,
         })
       } else if (isSupportV1) {
         this.session = wx.createVKSession({
           version: 'v1',
-          track: { plane: { mode: 3 }, body: { mode: 1 } },
+          track: {
+            // face: { mode: 1 },
+            body: { mode: 1 },
+            // hand: { mode: 1 },
+          },
           cameraPosition: this.data.cameraPosition,
           gl: glCtx,
         })
@@ -144,7 +152,10 @@ Component({
           // camExtArray: anchor.camExtArray,
           // camIntArray: anchor.camIntArray,
         })))
-        // console.log('@@@@@@@@ VKSession.updateAnchors. personCount:', this.data.anchor2DList.length)
+        anchors.map(anchor => {
+          console.log('@@@@@@@@ VKSession.updateAnchors. vkType:', anchor.type)
+        })
+        // console.log('@@@@@@@@ VKSession.updateAnchors. personCount:', anchors)
 
         // console.log("显示data")
         // console.log(this.data)
@@ -201,7 +212,7 @@ Component({
               }
               //画关键点gl
               this.drawPerson(this.data.anchor2DList)
-            
+
             }
           }
           // this.session.cancelAnimationFrame(this.vkRequstId)
@@ -227,14 +238,14 @@ Component({
         this.session.off('removeAnchors')
       }
     },
-    switchCamera(event){
+    switchCamera(event) {
       console.log('switchCamera')
-      if(this.session.config){
+      if (this.session.config) {
         const config = this.session.config
         config.cameraPosition = Number(event.currentTarget.dataset.value)
         this.session.config = config
         this.setData({
-          cameraPosition:event.currentTarget.dataset.value
+          cameraPosition: event.currentTarget.dataset.value
         })
       }
     },
