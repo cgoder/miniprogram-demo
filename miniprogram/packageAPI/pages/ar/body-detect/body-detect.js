@@ -208,19 +208,19 @@ Component({
               // //gl绘制图像帧
               if (vkFrame) {
                 // 绘制yuv图像
-                // this.drawGLFrameYUV(vkFrame)
+                this.drawGLFrameYUV(vkFrame)
 
-                //绘制RGB图像
-                const width = ((this.canvas.width + (16 - 1)) & (~(16 - 1)))
-                const height = ((this.canvas.height + (16 - 1)) & (~(16 - 1)))
-                // console.log('w1,w2',this.canvas.width, width)
-                const rgbFrameBuffer = vkFrame.getCameraBuffer(width,height)
-                if (rgbFrameBuffer) {
-                  this.drawGLFrameRGB(new Uint8Array(rgbFrameBuffer),width,height)
-                }
+                // //绘制RGB图像
+                // const width = ((this.canvas.width + (16 - 1)) & (~(16 - 1)))
+                // const height = ((this.canvas.height + (16 - 1)) & (~(16 - 1)))
+                // // console.log('w1,w2',this.canvas.width, width)
+                // const rgbFrameBuffer = vkFrame.getCameraBuffer(width,height)
+                // if (rgbFrameBuffer) {
+                //   this.drawGLFrameRGB(new Uint8Array(rgbFrameBuffer),width,height)
+                // }
               }
               //gl绘制关键点
-              // this.drawPerson(this.data.anchor2DList)
+              this.drawPerson(this.data.anchor2DList)
 
             }
           }
