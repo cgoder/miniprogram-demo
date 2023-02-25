@@ -153,7 +153,7 @@ Component({
           // camIntArray: anchor.camIntArray,
         })))
         anchors.map(anchor => {
-          console.log('@@@@@@@@ VKSession.updateAnchors. vkType:', anchor.type)
+          // console.log('@@@@@@@@ VKSession.updateAnchors. vkType:', anchor.type)
         })
         // console.log('@@@@@@@@ VKSession.updateAnchors. personCount:', anchors)
 
@@ -201,17 +201,26 @@ Component({
           if (mill > fpsInterval) {
             last = now - (mill % fpsInterval); //校正当前时间
 
-            const frame = this.session.getVKFrame(this.canvas.width, this.canvas.height)
+            const vkFrame = this.session.getVKFrame(this.canvas.width, this.canvas.height)
             // if (this.data.anchor2DList.length > 0) 
             {
               // this.cleanGL()
-              // //绘制图像帧gl
-              if (frame) {
-                // console.log('@@@@@@@@ VKSession.onFrame', this.data.anchor2DList)
-                this.drawFrame(frame)
+              // //gl绘制图像帧
+              if (vkFrame) {
+                // 绘制yuv图像
+                // this.drawGLFrameYUV(vkFrame)
+
+                //绘制RGB图像
+                const width = ((this.canvas.width + (16 - 1)) & (~(16 - 1)))
+                const height = ((this.canvas.height + (16 - 1)) & (~(16 - 1)))
+                // console.log('w1,w2',this.canvas.width, width)
+                const rgbFrameBuffer = vkFrame.getCameraBuffer(width,height)
+                if (rgbFrameBuffer) {
+                  this.drawGLFrameRGB(new Uint8Array(rgbFrameBuffer),width,height)
+                }
               }
-              //画关键点gl
-              this.drawPerson(this.data.anchor2DList)
+              //gl绘制关键点
+              // this.drawPerson(this.data.anchor2DList)
 
             }
           }
@@ -222,8 +231,6 @@ Component({
         this.vkRequstId = this.session.requestAnimationFrame(onFrame)
         console.log('---vk reqId: ', this.vkRequstId)
       })
-
-      this.initCamera()
 
     },
     stopVK() {
@@ -309,7 +316,7 @@ Component({
 
     onTouchEnd(evt) {
       console.log('---touch screen----')
-      this.snapshotCamera()
+      // this.snapshotCamera()
     }
   },
 })

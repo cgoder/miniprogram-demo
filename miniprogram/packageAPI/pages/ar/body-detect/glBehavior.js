@@ -1,3 +1,22 @@
+const buffers = {}
+const vertex = [
+    -1, -1, 0.0,
+    1, -1, 0.0,
+    1, 1, 0.0,
+    -1, 1, 0.0
+]
+
+const vertexIndice = [
+    0, 1, 2,
+    0, 2, 3
+]
+
+const texCoords = [
+    0.0, 0.0,
+    1.0, 0.0,
+    1.0, 1.0,
+    0.0, 1.0
+]
 
 const glBehavior = Behavior({
     data: {
@@ -13,12 +32,9 @@ const glBehavior = Behavior({
             console.log('initGL')
             // 
             const glCtx = glCanvas.getContext('webgl')
-            console.log('initGL! glCtx:',glCtx)
+            console.log('initGL! glCtx:', glCtx)
 
             glCtx.useProgram(glCtx.getParameter(glCtx.CURRENT_PROGRAM))
-
-            // this.initGLPerson(glCtx)
-            // this.initGLFrame(glCtx)
 
             return glCtx
         },
@@ -174,12 +190,12 @@ const glBehavior = Behavior({
         //
         disposeGLPerson() {
             console.log('disposeGLPerson')
-            if (this.glProgramPerson && this.glProgramPerson.gl) {
-                this.glProgramPerson.gl.deleteProgram(this.glProgramPerson)
+            if (this.glProgramPerson) {
+                this.glCtx.deleteProgram(this.glProgramPerson)
                 this.glProgramPerson = null
             }
-            if (this.glProgramRect && this.glProgramRect.gl) {
-                this.glProgramRect.gl.deleteProgram(this.glProgramRect)
+            if (this.glProgramRect) {
+                this.glCtx.deleteProgram(this.glProgramRect)
                 this.glProgramRect = null
             }
         },
@@ -296,9 +312,9 @@ const glBehavior = Behavior({
             return length;
         },
 
-        //初始化图像帧gl绘制
-        initGLFrame(glCtx) {
-            console.log('initGLFrame')
+        //初始化YUV图像帧gl绘制
+        initGLFrameYUV(glCtx) {
+            console.log('initGLFrameYUV')
 
             const vs = `
                     attribute vec2 a_position;
@@ -374,18 +390,10 @@ const glBehavior = Behavior({
             ext.bindVertexArrayOES(currentVAO)
             this._frameVO = vao
         },
-        //
-        disposeGLFrame() {
-            console.log('disposeGLFrame')
-            if (this.glProgramFrame && this.glProgramFrame.gl) {
-                this.glProgramFrame.gl.deleteProgram(this.glProgramFrame)
-                this.glProgramFrame = null
-            }
-        },
-        //绘制图像帧
-        drawFrame(vkFrame) {
+        //gl绘制YUV图像帧
+        drawGLFrameYUV(vkFrame) {
             if (this.glCtx && !this.glProgramFrame) {
-                this.initGLFrame(this.glCtx)
+                this.initGLFrameYUV(this.glCtx)
             }
             // console.log('glFrame:',this.glProgramFrame)
 
@@ -438,6 +446,123 @@ const glBehavior = Behavior({
                 glCtx.useProgram(currentProgram)
                 glCtx.activeTexture(currentActiveTexture)
                 this._frameEX.bindVertexArrayOES(currentVAO)
+            }
+        },
+        //初始化RGB图像帧gl绘制
+        initGLFrameRGB(glCtx) {
+            console.log('initGLFrameRGB')
+
+            const vs = `
+            attribute vec3 aPos;
+            attribute vec2 aVertexTextureCoord;
+            varying highp vec2 vTextureCoord;
+          
+            void main(void){
+              gl_Position = vec4(aPos, 1);
+              vTextureCoord = aVertexTextureCoord;
+            }
+          `
+
+            const fs = `
+            varying highp vec2 vTextureCoord;
+            uniform sampler2D uSampler;
+          
+            void main(void) {
+              gl_FragColor = texture2D(uSampler, vTextureCoord);
+            }
+          `
+
+            const glProgram = this.glProgramFrame = this.createGLProgram(glCtx, vs, fs)
+
+            // const info = wx.getSystemInfoSync()
+            // glCtx.canvas.width = info.pixelRatio * width
+            // glCtx.canvas.height = info.pixelRatio * height
+            // glCtx.viewport(0, 0, glCtx.drawingBufferWidth, glCtx.drawingBufferHeight)
+
+
+            glCtx.useProgram(glProgram)
+
+            const texture = this.texture = glCtx.createTexture()
+            glCtx.activeTexture(glCtx.TEXTURE0)
+            glCtx.bindTexture(glCtx.TEXTURE_2D, texture)
+            glCtx.pixelStorei(glCtx.UNPACK_FLIP_Y_WEBGL, true)
+            glCtx.texParameteri(glCtx.TEXTURE_2D, glCtx.TEXTURE_MAG_FILTER, glCtx.NEAREST)
+            glCtx.texParameteri(glCtx.TEXTURE_2D, glCtx.TEXTURE_MIN_FILTER, glCtx.NEAREST)
+            glCtx.texParameteri(glCtx.TEXTURE_2D, glCtx.TEXTURE_WRAP_S, glCtx.CLAMP_TO_EDGE)
+            glCtx.texParameteri(glCtx.TEXTURE_2D, glCtx.TEXTURE_WRAP_T, glCtx.CLAMP_TO_EDGE)
+            glCtx.bindTexture(glCtx.TEXTURE_2D, null)
+
+            buffers.vertexBuffer = glCtx.createBuffer()
+            glCtx.bindBuffer(glCtx.ARRAY_BUFFER, buffers.vertexBuffer)
+            glCtx.bufferData(glCtx.ARRAY_BUFFER, new Float32Array(vertex), glCtx.STATIC_DRAW)
+
+            buffers.vertexIndiceBuffer = glCtx.createBuffer()
+            glCtx.bindBuffer(glCtx.ELEMENT_ARRAY_BUFFER, buffers.vertexIndiceBuffer)
+            glCtx.bufferData(glCtx.ELEMENT_ARRAY_BUFFER, new Uint16Array(vertexIndice), glCtx.STATIC_DRAW)
+
+            const aVertexPosition = glCtx.getAttribLocation(glProgram, 'aPos')
+            glCtx.vertexAttribPointer(aVertexPosition, 3, glCtx.FLOAT, false, 0, 0)
+            glCtx.enableVertexAttribArray(aVertexPosition)
+
+            buffers.trianglesTexCoordBuffer = glCtx.createBuffer()
+            glCtx.bindBuffer(glCtx.ARRAY_BUFFER, buffers.trianglesTexCoordBuffer)
+            glCtx.bufferData(glCtx.ARRAY_BUFFER, new Float32Array(texCoords), glCtx.STATIC_DRAW)
+
+            const vertexTexCoordAttribute = glCtx.getAttribLocation(glProgram, 'aVertexTextureCoord')
+            glCtx.enableVertexAttribArray(vertexTexCoordAttribute)
+            glCtx.vertexAttribPointer(vertexTexCoordAttribute, 2, glCtx.FLOAT, false, 0, 0)
+
+            const samplerUniform = glCtx.getUniformLocation(glProgram, 'uSampler')
+            glCtx.uniform1i(samplerUniform, 0)
+
+        },
+        //gl绘制RGB图像帧
+        drawGLFrameRGB(rgbaFrameBuffer, width, height) {
+            if (this.glCtx && !this.glProgramFrame) {
+                this.initGLFrameRGB(this.glCtx)
+            }
+
+            if (!this.glCtx || !this.glProgramFrame) {
+                console.error('draw frame fail.')
+                return
+            }
+
+            // console.log('------draw frame-----',rgbaFrameBuffer,width,height)
+
+            const glCtx = this.glCtx
+            const glProgram = this.glProgramFrame
+            const texture = this.texture
+
+            glCtx.useProgram(glProgram)
+
+            glCtx.bindTexture(glCtx.TEXTURE_2D, texture)
+            glCtx.texImage2D(
+                glCtx.TEXTURE_2D, 0, glCtx.RGBA, width, height, 0, glCtx.RGBA, glCtx.UNSIGNED_BYTE, rgbaFrameBuffer
+            )
+            glCtx.drawElements(glCtx.TRIANGLES, 6, glCtx.UNSIGNED_SHORT, 0)
+
+        },
+        // 清理图像帧
+        disposeGLFrame() {
+            console.log('disposeGLFrame')
+            //yuv frame
+            if (this._frameDT) {
+                this._frameDT = null
+            }
+            if (this._frameEX) {
+                this._frameEX = null
+            }
+            if (this._frameVO) {
+                this._frameVO = null
+            }
+            //rgb frame
+            if (this.texture) {
+                this.texture = null
+            }
+            //glProgram
+            if (this.glProgramFrame) {
+                this.glCtx.deleteProgram(this.glProgramFrame)
+                this.glProgramFrame = null
             }
         },
         //清除gl屏
