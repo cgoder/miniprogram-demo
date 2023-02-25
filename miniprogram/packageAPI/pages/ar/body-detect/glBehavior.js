@@ -1,20 +1,6 @@
 
-import {
-    createScopedThreejs
-} from './threejs-miniprogram'
-// import {
-//     registerGLTFLoader
-// } from '../loaders/gltf-loader'
-
-const NEAR = 0.001
-const FAR = 1000
-
 const glBehavior = Behavior({
     data: {
-        THREE: null,
-        threeRender: null,
-        threejsScene: null,
-        threejsCamera: null,
         glCtx: null,
         glProgramFrame: null,
         glProgramPerson: null,
@@ -23,26 +9,11 @@ const glBehavior = Behavior({
     },
     methods: {
 
-        initGLThree(glCanvas) {
-            console.log('initGLThree')
-            // this.THREE = createScopedThreejs(glCanvas)
-            //gl模型加载
-            //registerGLTFLoader(this.THREE)
-
-
-            // // 渲染层
-            // this.threeRender = new this.THREE.WebGLRenderer({
-            //     antialias: true,
-            //     alpha: true
-            // })
-            // // this.threeRender.gammaOutput = true
-            // // this.threeRender.gammaFactor = 2.2
-
-            // const glCtx = this.glCtx = this.threeRender.getContext()
-
+        initGL(glCanvas) {
+            console.log('initGL')
             // 
             const glCtx = this.glCtx = glCanvas.getContext('webgl')
-            console.log('glCtx:',glCtx)
+            console.log('initGL! glCtx:',glCtx)
 
             glCtx.useProgram(glCtx.getParameter(glCtx.CURRENT_PROGRAM))
 
@@ -50,25 +21,11 @@ const glBehavior = Behavior({
             // this.initGLFrame(glCtx)
         },
 
-        disposeGLThree(glCanvas) {
-            console.log('disposeGLThree')
+        disposeGL(glCanvas) {
+            console.log('disposeGL')
             this.disposeGLPerson()
             this.disposeGLFrame()
 
-            // if (this.threeRender) {
-            //     this.threeRender.dispose()
-            //     this.threeRender = null
-            // }
-            // if (this.threejsScene) {
-            //     this.threejsScene.dispose()
-            //     this.threejsScene = null
-            // }
-            // if (this.threejsCamera) {
-            //     this.threejsCamera = null
-            // }
-            // if (this.THREE) {
-            //     this.THREE = null
-            // }
             if (this.glCtx) {
                 this.glCtx = null
             }
@@ -341,19 +298,6 @@ const glBehavior = Behavior({
         initGLFrame(glCtx) {
             console.log('initGLFrame')
 
-            // // 相机
-            // this.threejsCamera = new this.THREE.Camera()
-
-            // // 场景
-            // this.threejsScene = new this.THREE.Scene()
-            // // 光源
-            // const light1 = new this.THREE.HemisphereLight(0xffffff, 0x444444) // 半球光
-            // light1.position.set(0, 0.2, 0)
-            // this.threejsScene.add(light1)
-            // const light2 = new this.THREE.DirectionalLight(0xffffff) // 平行光
-            // light2.position.set(0, 0.2, 0.1)
-            // this.threejsScene.add(light2)
-
             const vs = `
                     attribute vec2 a_position;
                     attribute vec2 a_texCoord;
@@ -493,23 +437,6 @@ const glBehavior = Behavior({
                 glCtx.activeTexture(currentActiveTexture)
                 this._frameEX.bindVertexArrayOES(currentVAO)
             }
-
-            // const camera = frame.camera
-            // // 相机
-            // if (camera) {
-            //   // console.log("~~~~~~ logic camera: ",camera)
-            //   this.threejsCamera.matrixAutoUpdate = false
-            //   this.threejsCamera.matrixWorldInverse.fromArray(camera.viewMatrix)
-            //   this.threejsCamera.matrixWorld.getInverse(this.threejsCamera.matrixWorldInverse)
-
-            //   const projectionMatrix = camera.getProjectionMatrix(NEAR, FAR)
-            //   this.threejsCamera.projectionMatrix.fromArray(projectionMatrix)
-            //   this.threejsCamera.projectionMatrixInverse.getInverse(this.threejsCamera.projectionMatrix)
-            // }
-
-            // this.threeRender.autoClearColor = false
-            // this.threeRender.render(this.threejsScene, this.threejsCamera)
-            // this.threeRender.state.setCullFace(this.THREE.CullFaceNone)
         },
         //清除gl屏
         cleanGL() {

@@ -64,14 +64,14 @@ Component({
 
           this.calcSize(info.windowWidth, info.windowHeight * 0.8)
 
-          this.initGLThree(this.canvas)
+          this.initGL(this.canvas)
           this.initVK()
         })
     },
     onUnload() {
       console.log('---onUnload---')
       this.disposeVK()
-      this.disposeGLThree(this.canvas)
+      this.disposeGL(this.canvas)
     },
     initVK() {
       //检查vk支持情况
@@ -193,7 +193,7 @@ Component({
             // if (this.data.anchor2DList.length > 0) 
             {
               // this.cleanGL()
-              // //绘制图像帧threejs
+              // //绘制图像帧gl
               if (frame) {
                 // console.log('@@@@@@@@ VKSession.onFrame', this.data.anchor2DList)
                 this.drawFrame(frame)
