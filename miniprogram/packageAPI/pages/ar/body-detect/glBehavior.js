@@ -10,51 +10,54 @@ const NEAR = 0.001
 const FAR = 1000
 
 const glBehavior = Behavior({
+    data: {
+        THREE: null,
+        threeRender: null,
+        threejsScene: null,
+        threejsCamera: null,
+        glCtx: null,
+        glProgramFrame: null,
+        glProgramPerson: null,
+        glProgramRect: null,
+
+    },
     methods: {
 
         initGLThree(glCanvas) {
-            const THREE = this.THREE = createScopedThreejs(glCanvas)
+            console.log('initGLThree')
+            this.THREE = createScopedThreejs(glCanvas)
             //gl模型加载
-            //registerGLTFLoader(THREE)
+            //registerGLTFLoader(this.THREE)
 
-            // 相机
-            this.threejsCamera = new THREE.Camera()
 
-            // 场景
-            this.threejsScene = new THREE.Scene()
-            // // 光源
-            // const light1 = new THREE.HemisphereLight(0xffffff, 0x444444) // 半球光
-            // light1.position.set(0, 0.2, 0)
-            // this.threejsScene.add(light1)
-            // const light2 = new THREE.DirectionalLight(0xffffff) // 平行光
-            // light2.position.set(0, 0.2, 0.1)
-            // this.threejsScene.add(light2)
+            // // 渲染层
+            // this.threeRender = new this.THREE.WebGLRenderer({
+            //     antialias: true,
+            //     alpha: true
+            // })
+            // // this.threeRender.gammaOutput = true
+            // // this.threeRender.gammaFactor = 2.2
 
-            // 渲染层
-            const renderer = this.renderer = new THREE.WebGLRenderer({
-                antialias: true,
-                alpha: true
-            })
-            // renderer.gammaOutput = true
-            // renderer.gammaFactor = 2.2
-
+            // const glCtx = this.glCtx = this.threeRender.getContext()
 
             // 
-            // const glCtx = glCanvas.getContext()
-            const glCtx = this.glCtx = this.renderer.getContext()
+            const glCtx = this.glCtx = glCanvas.getContext('webgl')
+            console.log('glCtx:',glCtx)
+
             glCtx.useProgram(glCtx.getParameter(glCtx.CURRENT_PROGRAM))
 
-            this.initGLPerson(glCtx)
-            this.initGLFrame(glCtx)
+            // this.initGLPerson(glCtx)
+            // this.initGLFrame(glCtx)
         },
 
         disposeGLThree(glCanvas) {
+            console.log('disposeGLThree')
             this.disposeGLPerson()
             this.disposeGLFrame()
 
-            if (this.renderer) {
-                this.renderer.dispose()
-                this.renderer = null
+            if (this.threeRender) {
+                this.threeRender.dispose()
+                this.threeRender = null
             }
             if (this.threejsScene) {
                 this.threejsScene.dispose()
@@ -82,14 +85,14 @@ const glBehavior = Behavior({
             var fragmentShader = this.initShader(glCtx, glCtx.FRAGMENT_SHADER, fShaderSource)
 
             if (!vertexShader || !fragmentShader) {
-                console.log('GL:create shaders fail!')
+                console.error('GL:create shaders fail!')
                 return null
             }
 
             //创建程序对象program
             var program = glCtx.createProgram()
             if (!program) {
-                console.log('GL:create program fail!')
+                console.error('GL:create program fail!')
                 return null
             }
 
@@ -103,7 +106,7 @@ const glBehavior = Behavior({
             var linked = glCtx.getProgramParameter(program, glCtx.LINK_STATUS)
             if (!linked) {
                 var error = glCtx.getProgramInfoLog(program)
-                console.log('程序对象连接失败: ' + error)
+                console.error('程序对象连接失败: ' + error)
                 glCtx.deleteProgram(program)
                 glCtx.deleteShader(fragmentShader)
                 glCtx.deleteShader(vertexShader)
@@ -117,7 +120,7 @@ const glBehavior = Behavior({
             // 创建顶点着色器对象
             var shader = glCtx.createShader(type)
             if (shader == null) {
-                console.log('创建着色器失败')
+                console.error('创建着色器失败')
                 return null
             }
 
@@ -131,7 +134,7 @@ const glBehavior = Behavior({
             var compiled = glCtx.getShaderParameter(shader, glCtx.COMPILE_STATUS)
             if (!compiled) {
                 var error = glCtx.getShaderInfoLog(shader)
-                console.log('编译着色器失败: ' + error)
+                console.error('编译着色器失败: ' + error)
                 glCtx.deleteShader(shader)
                 return null
             }
@@ -141,6 +144,7 @@ const glBehavior = Behavior({
 
         //初始化人体gl绘制
         initGLPerson(glCtx) {
+            console.log('initGLPerson')
             //顶点着色器
             var PERSON_VSHADER_SOURCE = '' +
                 'attribute vec4 a_Position;\n' + //声明attribute变量a_Position，用来存放顶点位置信息
@@ -205,9 +209,12 @@ const glBehavior = Behavior({
 
             this.glProgramPerson = this.createGLProgram(glCtx, PERSON_VSHADER_SOURCE, PERSON_FSHADER_SOURCE)
             this.glProgramRect = this.createGLProgram(glCtx, RECT_EDGE_VSHADER_SOURCE, RECT_EDGE_FSHADER_SOURCE)
+
+            // console.log('glPerson: ', this.glProgramPerson)
         },
         //
         disposeGLPerson() {
+            console.log('disposeGLPerson')
             if (this.glProgramPerson && this.glProgramPerson.gl) {
                 this.glProgramPerson.gl.deleteProgram(this.glProgramPerson)
                 this.glProgramPerson = null
@@ -219,6 +226,10 @@ const glBehavior = Behavior({
         },
         //绘制人体
         drawPerson(anchorList) {
+            if (this.glCtx && !this.glProgramPerson) {
+                this.initGLPerson(this.glCtx)
+            }
+
             if (!this.glCtx || !this.glProgramPerson) {
                 console.error('draw person fail.')
                 return
@@ -229,6 +240,7 @@ const glBehavior = Behavior({
             }
 
             // console.log('---draw person---', anchorList)
+            // this.cleanGL()
 
             const glCtx = this.glCtx
             const glProgram = this.glProgramPerson
@@ -280,7 +292,7 @@ const glBehavior = Behavior({
         //绘制矩形框
         drawGLRectEdge(glCtx, x, y, width, height) {
             if (!this.glProgramRect) {
-                console.error('draw react fail.')
+                console.warn('draw react fail.')
                 return
             }
             glCtx.useProgram(this.glProgramRect)
@@ -327,6 +339,21 @@ const glBehavior = Behavior({
 
         //初始化图像帧gl绘制
         initGLFrame(glCtx) {
+            console.log('initGLFrame')
+
+            // 相机
+            this.threejsCamera = new this.THREE.Camera()
+
+            // 场景
+            this.threejsScene = new this.THREE.Scene()
+            // // 光源
+            // const light1 = new this.THREE.HemisphereLight(0xffffff, 0x444444) // 半球光
+            // light1.position.set(0, 0.2, 0)
+            // this.threejsScene.add(light1)
+            // const light2 = new this.THREE.DirectionalLight(0xffffff) // 平行光
+            // light2.position.set(0, 0.2, 0.1)
+            // this.threejsScene.add(light2)
+
             const vs = `
                     attribute vec2 a_position;
                     attribute vec2 a_texCoord;
@@ -403,6 +430,7 @@ const glBehavior = Behavior({
         },
         //
         disposeGLFrame() {
+            console.log('disposeGLFrame')
             if (this.glProgramFrame && this.glProgramFrame.gl) {
                 this.glProgramFrame.gl.deleteProgram(this.glProgramFrame)
                 this.glProgramFrame = null
@@ -410,6 +438,11 @@ const glBehavior = Behavior({
         },
         //绘制图像帧
         drawFrame(vkFrame) {
+            if (this.glCtx && !this.glProgramFrame) {
+                this.initGLFrame(this.glCtx)
+            }
+            // console.log('glFrame:',this.glProgramFrame)
+
             if (!this.glCtx || !this.glProgramFrame) {
                 console.error('draw frame fail.')
                 return
@@ -474,9 +507,9 @@ const glBehavior = Behavior({
             //   this.threejsCamera.projectionMatrixInverse.getInverse(this.threejsCamera.projectionMatrix)
             // }
 
-            this.renderer.autoClearColor = false
-            this.renderer.render(this.threejsScene, this.threejsCamera)
-            this.renderer.state.setCullFace(this.THREE.CullFaceNone)
+            // this.threeRender.autoClearColor = false
+            // this.threeRender.render(this.threejsScene, this.threejsCamera)
+            // this.threeRender.state.setCullFace(this.THREE.CullFaceNone)
         },
         //清除gl屏
         cleanGL() {
