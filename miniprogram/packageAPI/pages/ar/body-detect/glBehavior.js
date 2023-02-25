@@ -233,9 +233,6 @@ const glBehavior = Behavior({
             const glCtx = this.glCtx
             const glProgram = this.glProgramPerson
 
-            /* 指定清空canvas 的颜色 */
-            // glCtx.clearColor(0, 0, 0, 1);
-            // glCtx.clear(glCtx.COLOR_BUFFER_BIT);
 
             glCtx.useProgram(glProgram)
             glCtx.program = glProgram
@@ -480,6 +477,15 @@ const glBehavior = Behavior({
             this.renderer.autoClearColor = false
             this.renderer.render(this.threejsScene, this.threejsCamera)
             this.renderer.state.setCullFace(this.THREE.CullFaceNone)
+        },
+        //清除gl屏
+        cleanGL() {
+            if (!this.glCtx) {
+                return
+            }
+            /* 指定清空canvas 的颜色 */
+            this.glCtx.clearColor(0, 0, 0, 1);
+            this.glCtx.clear(this.glCtx.COLOR_BUFFER_BIT);
         },
     }
 })
