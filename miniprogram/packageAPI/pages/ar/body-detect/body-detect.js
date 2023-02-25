@@ -90,14 +90,14 @@ Component({
         this.session = wx.createVKSession({
           version: 'v2',
           track: { plane: { mode: 3 }, body: { mode: 1 } },
-          cameraPosition: cameraPosition,
+          cameraPosition: this.data.cameraPosition,
           gl: glCtx,
         })
       } else if (isSupportV1) {
         this.session = wx.createVKSession({
           version: 'v1',
           track: { plane: { mode: 3 }, body: { mode: 1 } },
-          cameraPosition: cameraPosition,
+          cameraPosition: this.data.cameraPosition,
           gl: glCtx,
         })
       } else {
