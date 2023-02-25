@@ -190,7 +190,9 @@ Component({
             last = now - (mill % fpsInterval); //校正当前时间
 
             const frame = this.session.getVKFrame(this.canvas.width, this.canvas.height)
-            if (this.data.anchor2DList.length > 0) {
+            // if (this.data.anchor2DList.length > 0) 
+            {
+              // this.cleanGL()
               // //绘制图像帧threejs
               if (frame) {
                 // console.log('@@@@@@@@ VKSession.onFrame', this.data.anchor2DList)
@@ -198,6 +200,7 @@ Component({
               }
               //画关键点gl
               this.drawPerson(this.data.anchor2DList)
+            
             }
           }
           // this.session.cancelAnimationFrame(this.vkRequstId)
