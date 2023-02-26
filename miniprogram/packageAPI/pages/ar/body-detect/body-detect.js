@@ -8,13 +8,13 @@ Component({
   data: {
     theme: 'light',
     cameraPosition: 0,
+    cameraStatus: false,
   },
   lifetimes: {
     /**
      * 生命周期函数--监听页面加载
      */
     detached() {
-      initShadersDone = false
       console.log("页面detached")
       if (wx.offThemeChange) {
         wx.offThemeChange()
@@ -67,6 +67,7 @@ Component({
 
           this.glCtx = this.initGL(this.canvas)
           this.initVK(this.glCtx)
+          // this.initCamera();
         })
     },
     onUnload() {
@@ -190,7 +191,7 @@ Component({
         console.log('@@@@@@@@ VKSession :', this.session)
 
         //限制调用帧率
-        let fps = 25
+        let fps = 30
         let fpsInterval = 1000 / fps
         let last = Date.now()
 
@@ -201,25 +202,26 @@ Component({
           if (mill > fpsInterval) {
             last = now - (mill % fpsInterval); //校正当前时间
 
-            const vkFrame = this.session.getVKFrame(this.canvas.width, this.canvas.height)
-            // if (this.data.anchor2DList.length > 0) 
-            {
-              // this.cleanGL()
-              // //gl绘制图像帧
-              if (vkFrame) {
-                // 绘制yuv图像
-                this.drawGLFrameYUV(vkFrame)
+            const width = ((this.canvas.width + (16 - 1)) & (~(16 - 1)))
+            const height = ((this.canvas.height + (16 - 1)) & (~(16 - 1)))
 
-                // //绘制RGB图像
-                // const width = ((this.canvas.width + (16 - 1)) & (~(16 - 1)))
-                // const height = ((this.canvas.height + (16 - 1)) & (~(16 - 1)))
-                // // console.log('w1,w2',this.canvas.width, width)
-                // const rgbFrameBuffer = vkFrame.getCameraBuffer(width,height)
-                // if (rgbFrameBuffer) {
-                //   this.drawGLFrameRGB(new Uint8Array(rgbFrameBuffer),width,height)
-                // }
-              }
-              //gl绘制关键点
+            const vkFrame = this.session.getVKFrame(width, height)
+
+            // this.cleanGL()
+
+            // //gl绘制图像帧
+            if (vkFrame) {
+              // 绘制yuv图像
+              this.drawGLFrameYUV(vkFrame)
+
+              // //绘制RGB图像
+              // // console.log('w1,w2',this.canvas.width, width)
+              // let rgbFrameBuffer = vkFrame.getCameraBuffer(width, height)
+              // if (rgbFrameBuffer) {
+              //   this.drawGLFrameRGB(new Uint8Array(rgbFrameBuffer), width, height)
+              // }
+
+              // gl绘制关键点
               this.drawPerson(this.data.anchor2DList)
 
             }
@@ -265,15 +267,37 @@ Component({
       }
       console.log(`cameraContext:`, this.camera);
 
-      // // this.fpsHelper = new FpsHelper();
-      // this.cameraListener = this.camera.onCameraFrame(frame => {
-      //   // const fps = this.fpsHelper.getAverageFps();
-      //   // console.log(`fps`,fps);
-      //   console.log(`camera onFrame`, frame.width, frame.height);
-      //   // }
-      // });
-      // this.cameraListener.start();
-      // // this.fpsHelper.reset();
+      this.listener = this.camera.onCameraFrame((frame) => {
+        this.drawGLFrameRGB(new Uint8Array(frame.data), frame.width, frame.height)
+        this.setData({
+          width: frame.width / 2,
+          height: frame.height / 2,
+        })
+      })
+
+      this.startCamera()
+    },
+    startCamera() {
+      if (this.camera && this.listener) {
+        if (!this.data.cameraStatus) {
+          console.log('startCamera')
+          this.listener.start()
+          this.setData({
+            cameraStatus: !this.data.cameraStatus
+          })
+        }
+      }
+    },
+    stopCamera() {
+      if (this.camera && this.listener) {
+        if (this.data.cameraStatus) {
+          console.log('stopCamera')
+          this.listener.stop()
+          this.setData({
+            cameraStatus: !this.data.cameraStatus
+          })
+        }
+      }
     },
     snapshotCamera() {
       console.log(`snapshotCamera:`, this.camera);
@@ -316,7 +340,12 @@ Component({
 
     onTouchEnd(evt) {
       console.log('---touch screen----')
-      // this.snapshotCamera()
+      if (this.data.cameraStatus) {
+        this.stopCamera()
+      } else {
+        this.startCamera()
+      }
+
     }
   },
 })

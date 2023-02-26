@@ -2,6 +2,14 @@
   <view>
     <canvas type="webgl" id="webgl" style="width: {{width}}px; height: {{height}}px" bindtouchend="onTouchEnd"></canvas>
   </view>
+  <!-- <view>
+    <camera flash="off" device-position="{{cameraPosition}}" binderror="error" resolution="high" frame-size="large"></camera>
+    <view class="info-container">
+      <view style="margin: 10px 0">使用实时数据帧在 gl canvas 展示</view>
+      <view>帧高度：{{ frameHeight }}  帧宽度：{{ frameWidth }}</view>
+      <canvas id="webgl" type="webgl" style="width: {{width}}px; height: {{height}}px;" bindtouchend="onTouchEnd"></canvas>
+    </view>
+  </view> -->
   <view class="page-body-text tc" style="height:20%">
     提示：将摄像头对准人体, 检测到的人体将会被标记出识别框和人体部位标记点
     <view wx:if="{{cameraPosition == 0}}">

@@ -210,7 +210,7 @@ const glBehavior = Behavior({
                 return
             }
             if (!anchorList || anchorList.length <= 0) {
-                console.warn('there are no person!')
+                // console.warn('there are no person!')
                 return
             }
 
@@ -402,7 +402,7 @@ const glBehavior = Behavior({
                 return
             }
 
-            // console.log('------draw frame-----',vkFrame)
+            // console.log('------draw frame-----')
 
             const glCtx = this.glCtx
             const glProgram = this.glProgramFrame
@@ -449,7 +449,7 @@ const glBehavior = Behavior({
             }
         },
         //初始化RGB图像帧gl绘制
-        initGLFrameRGB(glCtx) {
+        initGLFrameRGB(glCtx,width,height) {
             console.log('initGLFrameRGB')
 
             const vs = `
@@ -474,10 +474,10 @@ const glBehavior = Behavior({
 
             const glProgram = this.glProgramFrame = this.createGLProgram(glCtx, vs, fs)
 
-            // const info = wx.getSystemInfoSync()
-            // glCtx.canvas.width = info.pixelRatio * width
-            // glCtx.canvas.height = info.pixelRatio * height
-            // glCtx.viewport(0, 0, glCtx.drawingBufferWidth, glCtx.drawingBufferHeight)
+            const info = wx.getSystemInfoSync()
+            glCtx.canvas.width = info.pixelRatio * width
+            glCtx.canvas.height = info.pixelRatio * height
+            glCtx.viewport(0, 0, glCtx.drawingBufferWidth, glCtx.drawingBufferHeight)
 
 
             glCtx.useProgram(glProgram)
@@ -515,11 +515,19 @@ const glBehavior = Behavior({
             const samplerUniform = glCtx.getUniformLocation(glProgram, 'uSampler')
             glCtx.uniform1i(samplerUniform, 0)
 
+            this.drawRGB =  (arrayBuffer, width, height) => {
+                glCtx.bindTexture(glCtx.TEXTURE_2D, texture)
+                glCtx.texImage2D(
+                    glCtx.TEXTURE_2D, 0, glCtx.RGBA, width, height, 0, glCtx.RGBA, glCtx.UNSIGNED_BYTE, arrayBuffer
+                )
+                glCtx.drawElements(glCtx.TRIANGLES, 6, glCtx.UNSIGNED_SHORT, 0)
+              }
+
         },
         //gl绘制RGB图像帧
         drawGLFrameRGB(rgbaFrameBuffer, width, height) {
             if (this.glCtx && !this.glProgramFrame) {
-                this.initGLFrameRGB(this.glCtx)
+                this.initGLFrameRGB(this.glCtx,width,height)
             }
 
             if (!this.glCtx || !this.glProgramFrame) {
@@ -527,19 +535,32 @@ const glBehavior = Behavior({
                 return
             }
 
-            // console.log('------draw frame-----',rgbaFrameBuffer,width,height)
+            // console.log('------draw frame-----',width,height)
 
-            const glCtx = this.glCtx
-            const glProgram = this.glProgramFrame
-            const texture = this.texture
+            // const glCtx = this.glCtx
+            // const glProgram = this.glProgramFrame
+            // // const texture = this.texture
 
-            glCtx.useProgram(glProgram)
+            // // 保存当前glProgram
+            // const currentProgram = glCtx.getParameter(glCtx.CURRENT_PROGRAM)
+            // const currentActiveTexture = glCtx.getParameter(glCtx.ACTIVE_TEXTURE)
+            // // const currentVAO = glCtx.getParameter(glCtx.VERTEX_ARRAY_BINDING)
 
-            glCtx.bindTexture(glCtx.TEXTURE_2D, texture)
-            glCtx.texImage2D(
-                glCtx.TEXTURE_2D, 0, glCtx.RGBA, width, height, 0, glCtx.RGBA, glCtx.UNSIGNED_BYTE, rgbaFrameBuffer
-            )
-            glCtx.drawElements(glCtx.TRIANGLES, 6, glCtx.UNSIGNED_SHORT, 0)
+            // glCtx.useProgram(glProgram)
+
+            this.drawRGB(rgbaFrameBuffer,width,height)
+
+            // glCtx.bindTexture(glCtx.TEXTURE_2D, this.texture)
+            // glCtx.texImage2D(
+            //     glCtx.TEXTURE_2D, 0, glCtx.RGBA, width, height, 0, glCtx.RGBA, glCtx.UNSIGNED_BYTE, rgbaFrameBuffer
+            // )
+            // glCtx.drawElements(glCtx.TRIANGLES, 6, glCtx.UNSIGNED_SHORT, 0)
+
+
+            // // 切换回历史glProgram
+            // glCtx.useProgram(currentProgram)
+            // glCtx.activeTexture(currentActiveTexture)
+            // // this._frameEX.bindVertexArrayOES(currentVAO)
 
         },
         // 清理图像帧
